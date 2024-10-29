@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar Events</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-family: Arial, sans-serif;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    td {
+      background-color: #f9f9f9;
+    }
+    .attendees-list span {
+      display: inline-block;
+      margin-right: 5px;
+      padding: 4px 8px;
+      background-color: #e0f7fa;
+      border-radius: 12px;
+      font-size: 0.9em;
+    }
+    .remove-btn {
+      cursor: pointer;
+      margin-left: 5px;
+      color: #f44336;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Upcoming Events</h1>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Date</th>
+        <th>Location</th>
+        <th>Attendees</th>
+      </tr>
+    </thead>
+    <tbody id="eventsTable"></tbody>
+  </table>
+
+  <h2>Add Attendee</h2>
+  <input type="text" id="eventTitleInput" placeholder="Event Title">
+  <input type="text" id="attendeeNameInput" placeholder="Attendee Name">
+  <button onclick="addAttendeeHandler()">Add Attendee</button>
+
+  <script>
+    const events = [
+      { title: "Conference", date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), location: "Conference Hall", attendees: new Set(["Alice", "Bob"]) },
+      { title: "Workshop", date: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), location: "Main Office", attendees: new Set(["Charlie", "Daisy"]) },
+      { title: "Team Meeting", date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), location: "Online", attendees: new Set(["Eve", "Frank"]) },
+      { title: "Networking Event", date: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000), location: "Community Center", attendees: new Set(["Gina", "Hank"]) }
+    ];
+
+    const upcomingEvents = events.filter(event => {
+      const now = new Date();
+      const oneWeekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      return event.date >= now && event.date <= oneWeekLater;
+    });
+
+    function displayEvents(events) {
+      const eventsTable = document.getElementById('eventsTable');
+      eventsTable.innerHTML = '';
+      events.forEach(({ title, date, location, attendees }) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${title}</td>
+          <td>${date.toLocaleDateString("en-US")}</td>
+          <td>${location}</td>
+          <td class="attendees-list">${Array.from(attendees).map(attendee => `
+            <span>${attendee} <span class="remove-btn" onclick="removeAttendee('${title}', '${attendee}')">×</span></span>
+          `).join("")}</td>
+        `;
+        eventsTable.appendChild(row);
+      });
+    }
+
+    function addAttendee(eventTitle, attendeeName) {
+      const event = events.find(event => event.title === eventTitle);
+      if (event) {
+        event.attendees.add(attendeeName);
+        alert(`Attendee ${attendeeName} added to ${eventTitle}`);
+        displayEvents(upcomingEvents);
+      } else {
+        alert(`Event with title "${eventTitle}" not found.`);
+      }
+    }
+
+    function addAttendeeHandler() {
+      const eventTitle = document.getElementById('eventTitleInput').value;
+      const attendeeName = document.getElementById('attendeeNameInput').value;
+      if (eventTitle && attendeeName) {
+        addAttendee(eventTitle, attendeeName);
+        document.getElementById('eventTitleInput').value = '';
+        document.getElementById('attendeeNameInput').value = '';
+      } else {
+        alert("Please enter both event title and attendee name.");
+      }
+    }
+
+    function removeAttendee(eventTitle, attendeeName) {
+      const event = events.find(event => event.title === eventTitle);
+      if (event) {
+        event.attendees.delete(attendeeName);
+        alert(`Attendee ${attendeeName} removed from ${eventTitle}`);
+        displayEvents(upcomingEvents);
+      }
+    }
+
+    displayEvents(upcomingEvents);
+  </script>
+</body>
+</html>
